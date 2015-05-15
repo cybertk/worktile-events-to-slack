@@ -34,6 +34,10 @@ func handler(w http.ResponseWriter, r *http.Request, slackUrl string) {
 
 	err := json.NewDecoder(r.Body).Decode(&notification)
 
+	if debug := os.Getenv("DEBUG"); len(debug) != 0 {
+		fmt.Println(string(notification.Data))
+	}
+
 	if err != nil {
 		message = fmt.Sprintln("Cannot decode notification: ", err)
 	} else {
