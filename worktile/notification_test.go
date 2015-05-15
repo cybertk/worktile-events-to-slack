@@ -109,4 +109,19 @@ func TestNotificationEvent(t *testing.T) {
 		})
 
 	})
+
+	Convey("Given a expire_task notification", t, func() {
+
+		notification := Notification{Action: "expire_task", Data: []byte(`{}`)}
+
+		Convey("When parse event", func() {
+
+			event := notification.Event()
+
+			Convey("Should parsed succeed", func() {
+				So(event, ShouldHaveSameTypeAs, new(ExpireTaskEvent))
+			})
+		})
+
+	})
 }
