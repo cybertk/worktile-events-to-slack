@@ -139,4 +139,19 @@ func TestNotificationEvent(t *testing.T) {
 		})
 
 	})
+
+	Convey("Given a comment_task notification", t, func() {
+
+		notification := Notification{Action: "comment_task", Data: []byte(`{}`)}
+
+		Convey("When parse event", func() {
+
+			event := notification.Event()
+
+			Convey("Should parsed succeed", func() {
+				So(event, ShouldHaveSameTypeAs, new(CommentTaskEvent))
+			})
+		})
+
+	})
 }
