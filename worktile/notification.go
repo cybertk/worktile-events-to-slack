@@ -35,6 +35,13 @@ func (notification *Notification) Event() Event {
 			return nil
 		}
 		return &data
+	case "assign_task":
+		var data AssignTaskEvent
+		if err := json.Unmarshal(notification.Data, &data); err != nil {
+			fmt.Println("Unmarshal error ", err)
+			return nil
+		}
+		return &data
 	default:
 		fmt.Println(notification.Action, "is of a type I don't know how to handle")
 		return nil
