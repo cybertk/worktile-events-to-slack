@@ -17,10 +17,16 @@ func (notification *Notification) Event() Event {
 	case "create_task":
 		var data CreateTaskEvent
 		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("ck-error", err, data.Format())
+			fmt.Println("Unmarshal error ", err)
 			return nil
 		}
-		fmt.Println("ck-error", data.Format())
+		return &data
+	case "complete_task":
+		var data CompleteTaskEvent
+		if err := json.Unmarshal(notification.Data, &data); err != nil {
+			fmt.Println("Unmarshal error ", err)
+			return nil
+		}
 		return &data
 	default:
 		fmt.Println(notification.Action, "is of a type I don't know how to handle")
