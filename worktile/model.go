@@ -1,7 +1,6 @@
 package worktile
 
 type Event interface {
-	Format() string
 }
 
 type User struct {

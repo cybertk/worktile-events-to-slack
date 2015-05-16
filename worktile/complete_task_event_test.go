@@ -49,32 +49,3 @@ func TestCompleteTaskEventUnmarshal(t *testing.T) {
 		})
 	})
 }
-
-func TestCompleteTaskEventFormat(t *testing.T) {
-
-	Convey("Given a CompleteTaskEvent", t, func() {
-
-		event := CompleteTaskEvent{
-			Name:      "Task Name",
-			EntryName: "Entry Name",
-			CreateBy: User{
-				Name: "User Name",
-			},
-			Project: Project{
-				Name: "Project Name",
-			},
-		}
-
-		Convey("When Format()", func() {
-
-			str := event.Format()
-
-			Convey("Should contains corresponding struct info", func() {
-				So(str, ShouldContainSubstring, "Task Name")
-				So(str, ShouldContainSubstring, "Entry Name")
-				So(str, ShouldContainSubstring, "User Name")
-				So(str, ShouldContainSubstring, "Project Name")
-			})
-		})
-	})
-}

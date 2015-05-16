@@ -49,32 +49,3 @@ func TestCreateTaskEventUnmarshal(t *testing.T) {
 		})
 	})
 }
-
-func TestCreateTaskEventFormat(t *testing.T) {
-
-	Convey("Given a CreateTaskEvent", t, func() {
-
-		event := CreateTaskEvent{
-			Name:      "Task Name",
-			EntryName: "Entry Name",
-			CreateBy: User{
-				Name: "User Name",
-			},
-			Project: Project{
-				Name: "Project Name",
-			},
-		}
-
-		Convey("When Format()", func() {
-
-			str := event.Format()
-
-			Convey("Should contains corresponding struct info", func() {
-				So(str, ShouldContainSubstring, "Task Name")
-				So(str, ShouldContainSubstring, "Entry Name")
-				So(str, ShouldContainSubstring, "User Name")
-				So(str, ShouldContainSubstring, "Project Name")
-			})
-		})
-	})
-}

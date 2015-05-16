@@ -51,29 +51,3 @@ func TestCommentTaskEventUnmarshal(t *testing.T) {
 		})
 	})
 }
-
-func TestCommentTaskEventFormat(t *testing.T) {
-
-	Convey("Given a CommentTaskEvent", t, func() {
-
-		event := CommentTaskEvent{
-			Name:      "Task Name",
-			EntryName: "Entry Name",
-			Comment:   Comment{Message: "Comment Message", CreateBy: User{Name: "User Name"}},
-			Project:   Project{Name: "Project Name"},
-		}
-
-		Convey("When Format()", func() {
-
-			str := event.Format()
-
-			Convey("Should contains corresponding struct info", func() {
-				So(str, ShouldContainSubstring, "Task Name")
-				So(str, ShouldContainSubstring, "Entry Name")
-				So(str, ShouldContainSubstring, "User Name")
-				So(str, ShouldContainSubstring, "Comment Message")
-				So(str, ShouldContainSubstring, "Project Name")
-			})
-		})
-	})
-}

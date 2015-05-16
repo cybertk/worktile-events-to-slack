@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/cybertk/worktile-events-to-slack/worktile"
 )
@@ -35,35 +36,36 @@ func format(event worktile.Event) SlackAttachment {
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
-			Text:      e.Format(),
+			Text:      fmt.Sprintf("%s created task *%s* in _%s_", e.CreateBy.Name, e.Name, e.EntryName),
 		}
 	case *worktile.CompleteTaskEvent:
 		return SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
-			Text:      e.Format(),
+			Text:      fmt.Sprintf("%s finished task *%s* in _%s_", e.CreateBy.Name, e.Name, e.EntryName),
 		}
 	case *worktile.ExpireTaskEvent:
+		dueDate := time.Unix(e.ExpireDate/1000, 0).Format("Jan _2")
 		return SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
-			Text:      e.Format(),
+			Text:      fmt.Sprintf("%s set task *%s* in _%s_ due time to %s", e.CreateBy.Name, e.Name, e.EntryName, dueDate),
 		}
 	case *worktile.AssignTaskEvent:
 		return SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
-			Text:      e.Format(),
+			Text:      fmt.Sprintf("%s assigned task *%s* in _%s_ to %s", e.CreateBy.Name, e.Name, e.EntryName, e.AssignUser.Name),
 		}
 	case *worktile.CommentTaskEvent:
 		return SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
-			Text:      e.Format(),
+			Text:      fmt.Sprintf("%s add comments to task *%s* in _%s_\n%s", e.Comment.CreateBy.Name, e.Name, e.EntryName, e.Comment.Message),
 		}
 	default:
 		return SlackAttachment{}
