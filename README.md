@@ -9,6 +9,20 @@
 
 ## Getting Started
 
+创建Slack Incoming Webhook
+
+1. 进入在Slack的Integrations设置
+1. 新建一个Incoming Webhook
+1. 获取Incoming Webhook地址, 如https://XXX.slack.com/services/hooks/incoming-webhook?token=...
+
+部署**worktile-events-to-slack**
+
     docker run -e SLACK_URL="https://XXX.slack.com/services/hooks/incoming-webhook?token=TOKEN" quanlong/worktile-events-to-slack
 
-`SLACK_URL`是Slack的Incoming Webhook地址
+`SLACK_URL`是从Slack获取的Incoming Webhook地址
+
+创建Worktile Webhook
+
+1. 进入Worktile的项目设置中的Webhook设置
+1. 添加Webhook
+1. 通知URL字段填写**worktile-events-to-slack**部署后的URL
