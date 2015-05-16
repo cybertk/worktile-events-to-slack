@@ -13,44 +13,31 @@ type Notification struct {
 
 func (notification *Notification) Event() Event {
 
+	var event Event
+
 	switch notification.Action {
 	case "create_task":
-		var data CreateTaskEvent
-		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("Unmarshal error ", err)
-			return nil
-		}
-		return &data
+		event = new(CreateTaskEvent)
 	case "complete_task":
-		var data CompleteTaskEvent
-		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("Unmarshal error ", err)
-			return nil
-		}
-		return &data
+		event = new(CompleteTaskEvent)
 	case "expire_task":
-		var data ExpireTaskEvent
-		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("Unmarshal error ", err)
-			return nil
-		}
-		return &data
+		event = new(ExpireTaskEvent)
 	case "assign_task":
-		var data AssignTaskEvent
-		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("Unmarshal error ", err)
-			return nil
-		}
-		return &data
+		event = new(AssignTaskEvent)
 	case "comment_task":
-		var data CommentTaskEvent
-		if err := json.Unmarshal(notification.Data, &data); err != nil {
-			fmt.Println("Unmarshal error ", err)
-			return nil
-		}
-		return &data
+		event = new(CommentTaskEvent)
 	default:
-		fmt.Println(notification.Action, "is of a type I don't know how to handle")
+		event = nil
+	}
+
+	if event == nil {
+		fmt.Println(notification.Action, " is of a type I don't know how to handle")
 		return nil
+	}
+
+	if err := json.Unmarshal(notification.Data, event); err != nil {
+		return nil
+	} else {
+		return event
 	}
 }
