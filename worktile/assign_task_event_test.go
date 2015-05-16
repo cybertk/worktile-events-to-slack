@@ -61,6 +61,7 @@ func TestAssignTaskEventUnmarshal(t *testing.T) {
 				So(event.EntryName, ShouldEqual, "TODO")
 				So(event.CreateBy.Name, ShouldEqual, "quanlong")
 				So(event.Project.Name, ShouldEqual, "Foo Project")
+				So(event.Project.Id, ShouldEqual, "f5fb3690f0e3403abf3f590a08b3df95")
 				So(event.AssignUser.Name, ShouldEqual, "quanlong")
 			})
 		})

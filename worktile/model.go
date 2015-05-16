@@ -10,4 +10,5 @@ type User struct {
 
 type Project struct {
 	Name string
+	Id   string `json:"pid"`
 }

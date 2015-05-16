@@ -10,46 +10,99 @@ import (
 	"github.com/cybertk/worktile-events-to-slack/worktile"
 )
 
-// Slack incoming webhooks API, see https://api.slack.com/incoming-webhooks
+// Slack message attachments, see https://api.slack.com/docs/attachments
 type SlackMessage struct {
-	Text       string `json:"text"`
-	IsMarkdown bool   `json:"mrkdwn"`
+	Attachments [1]SlackAttachment `json:"attachments"`
 }
 
-func sendToSlack(webhookUrl string, message string) (*http.Response, error) {
-	slackMessage := SlackMessage{Text: message, IsMarkdown: true}
+type SlackAttachment struct {
+	Color     string `json:"color"`
+	Title     string `json:"title"`
+	TitleLink string `json:"title_link"`
+	Text      string `json:"text"`
+}
+
+// export DEBUG=1
+func isDebug() bool {
+	return len(os.Getenv("DEBUG")) != 0
+}
+
+func format(event worktile.Event) SlackAttachment {
+
+	switch e := event.(type) {
+	case *worktile.CreateTaskEvent:
+		return SlackAttachment{
+			Color:     "#36a64f",
+			Title:     e.Project.Name,
+			TitleLink: "https://worktile.com/project/" + e.Project.Id,
+			Text:      e.Format(),
+		}
+	case *worktile.CompleteTaskEvent:
+		return SlackAttachment{
+			Color:     "#36a64f",
+			Title:     e.Project.Name,
+			TitleLink: "https://worktile.com/project/" + e.Project.Id,
+			Text:      e.Format(),
+		}
+	case *worktile.ExpireTaskEvent:
+		return SlackAttachment{
+			Color:     "#36a64f",
+			Title:     e.Project.Name,
+			TitleLink: "https://worktile.com/project/" + e.Project.Id,
+			Text:      e.Format(),
+		}
+	case *worktile.AssignTaskEvent:
+		return SlackAttachment{
+			Color:     "#36a64f",
+			Title:     e.Project.Name,
+			TitleLink: "https://worktile.com/project/" + e.Project.Id,
+			Text:      e.Format(),
+		}
+	case *worktile.CommentTaskEvent:
+		return SlackAttachment{
+			Color:     "#36a64f",
+			Title:     e.Project.Name,
+			TitleLink: "https://worktile.com/project/" + e.Project.Id,
+			Text:      e.Format(),
+		}
+	default:
+		return SlackAttachment{}
+	}
+}
+
+func sendToSlack(webhookUrl string, event worktile.Event) (*http.Response, error) {
+	slackMessage := SlackMessage{
+		Attachments: [...]SlackAttachment{format(event)},
+	}
 
 	payload, err := json.Marshal(slackMessage)
 	if err != nil {
 		return nil, err
 	}
 	payloadStr := string(payload)
-	fmt.Println(payloadStr)
+
+	if isDebug() {
+		fmt.Println(payloadStr)
+	}
+
+	// Slack incoming webhooks API, see https://api.slack.com/incoming-webhooks
 	return http.PostForm(webhookUrl, url.Values{"payload": {payloadStr}})
 }
 
 func handler(w http.ResponseWriter, r *http.Request, slackUrl string) {
-	var message string
 	var notification worktile.Notification
 
-	err := json.NewDecoder(r.Body).Decode(&notification)
+	if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
+		fmt.Println("Decode error")
+		w.WriteHeader(500)
+		return
+	}
 
-	if debug := os.Getenv("DEBUG"); len(debug) != 0 {
+	if isDebug() {
 		fmt.Println(string(notification.Data))
 	}
 
-	if err != nil {
-		message = fmt.Sprintln("Cannot decode notification: ", err)
-	} else {
-
-		if event := notification.Event(); event == nil {
-			message = "Cannot decode event"
-		} else {
-			message = event.Format()
-		}
-	}
-
-	if _, err = sendToSlack(slackUrl, message); err != nil {
+	if _, err := sendToSlack(slackUrl, notification.Event()); err != nil {
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(500)
