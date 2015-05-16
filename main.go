@@ -17,10 +17,11 @@ type SlackMessage struct {
 }
 
 type SlackAttachment struct {
-	Color     string `json:"color"`
-	Title     string `json:"title"`
-	TitleLink string `json:"title_link"`
-	Text      string `json:"text"`
+	Color      string   `json:"color"`
+	Title      string   `json:"title"`
+	TitleLink  string   `json:"title_link"`
+	Text       string   `json:"text"`
+	MarkdownIn []string `json:"mrkdwn_in"`
 }
 
 // export DEBUG=1
@@ -30,16 +31,17 @@ func isDebug() bool {
 
 func format(event worktile.Event) SlackAttachment {
 
+	var attachment SlackAttachment
 	switch e := event.(type) {
 	case *worktile.CreateTaskEvent:
-		return SlackAttachment{
+		attachment = SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
 			Text:      fmt.Sprintf("%s created task *%s* in _%s_", e.CreateBy.Name, e.Name, e.EntryName),
 		}
 	case *worktile.CompleteTaskEvent:
-		return SlackAttachment{
+		attachment = SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
@@ -47,29 +49,33 @@ func format(event worktile.Event) SlackAttachment {
 		}
 	case *worktile.ExpireTaskEvent:
 		dueDate := time.Unix(e.ExpireDate/1000, 0).Format("Jan _2")
-		return SlackAttachment{
+		attachment = SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
 			Text:      fmt.Sprintf("%s set task *%s* in _%s_ due time to %s", e.CreateBy.Name, e.Name, e.EntryName, dueDate),
 		}
 	case *worktile.AssignTaskEvent:
-		return SlackAttachment{
+		attachment = SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
 			Text:      fmt.Sprintf("%s assigned task *%s* in _%s_ to %s", e.CreateBy.Name, e.Name, e.EntryName, e.AssignUser.Name),
 		}
 	case *worktile.CommentTaskEvent:
-		return SlackAttachment{
+		attachment = SlackAttachment{
 			Color:     "#36a64f",
 			Title:     e.Project.Name,
 			TitleLink: "https://worktile.com/project/" + e.Project.Id,
 			Text:      fmt.Sprintf("%s add comments to task *%s* in _%s_\n%s", e.Comment.CreateBy.Name, e.Name, e.EntryName, e.Comment.Message),
 		}
 	default:
-		return SlackAttachment{}
+		attachment = SlackAttachment{}
 	}
+
+	// Enable markdown in text field, see https://api.slack.com/docs/formatting
+	attachment.MarkdownIn = []string{"text"}
+	return attachment
 }
 
 func sendToSlack(webhookUrl string, event worktile.Event) (*http.Response, error) {
