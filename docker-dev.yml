@@ -1,0 +1,9 @@
+dev:
+    image: coverit/golang-dev
+    volumes:
+      - .:/go/src/github.com/cybertk/worktile-events-to-slack
+    working_dir: /go/src/github.com/cybertk/worktile-events-to-slack
+    ports:
+        - "3000:3000"
+    environment:
+        - PORT=3000

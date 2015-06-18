@@ -26,3 +26,13 @@
 1. 进入Worktile的项目设置中的Webhook设置
 1. 添加Webhook
 1. 通知URL字段填写**worktile-events-to-slack**部署后的URL
+
+## Test
+
+Development environment is backed by Docker, so enter dev env with
+
+    make dev
+
+Then test with
+
+    make test
