@@ -103,8 +103,15 @@ func handler(w http.ResponseWriter, r *http.Request, send func(string, worktile.
 
 	var slackUrl = r.FormValue("slack_url")
 
-	if len(slackUrl) == 0 {
-		fmt.Println("environment variables SLACK_URL is not set correctly")
+	if _, err := url.Parse(slackUrl); err != nil {
+		fmt.Println("No body received")
+		w.WriteHeader(400)
+		return
+	}
+
+	if r.Body == nil {
+		fmt.Println("No body received")
+		w.WriteHeader(400)
 		return
 	}
 

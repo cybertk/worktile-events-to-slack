@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -155,7 +156,7 @@ func (m *MyMockedObject) sendToSlack(url string, event worktile.Event) error {
 
 func TestHandler(t *testing.T) {
 
-	Convey("Given a normal http.Request", t, func() {
+	Convey("Given a POST request with valid slack_url param and valid notification data body", t, func() {
 
 		data := []byte(`
 {
@@ -191,7 +192,7 @@ func TestHandler(t *testing.T) {
 		var notification worktile.Notification
 		json.NewDecoder(bytes.NewBuffer(data)).Decode(&notification)
 
-		Convey("And a stub func of sendToSlack", func() {
+		Convey("And sendToSlack() always returns nil", func() {
 
 			// Stubs
 			w := httptest.NewRecorder()
@@ -199,15 +200,15 @@ func TestHandler(t *testing.T) {
 
 			m.On("sendToSlack", expectedURL, notification.Event()).Return(nil).Once()
 
-			Convey("When invoke with hanlder()", func() {
+			Convey("When invoke hanlder() with them", func() {
 
 				handler(w, req, m.sendToSlack)
 
-				Convey("Then sendToSlack() should be called properly", func() {
+				Convey("Then sendToSlack() should be called with correct parameters", func() {
 
 					m.AssertExpectations(t)
 
-					Convey("And http.ResponseWriter should be writeen properly", func() {
+					Convey("And send 200 to http.ResponseWriter", func() {
 						So(w.Code, ShouldEqual, 200)
 					})
 
@@ -215,5 +216,79 @@ func TestHandler(t *testing.T) {
 			})
 		})
 
+		Convey("And sendToSlack() returns error", func() {
+
+			// Stubs
+			w := httptest.NewRecorder()
+			m := new(MyMockedObject)
+
+			m.On("sendToSlack", expectedURL, notification.Event()).Return(errors.New("Error A")).Once()
+
+			Convey("When invoke hanlder() with them", func() {
+
+				handler(w, req, m.sendToSlack)
+
+				Convey("Then sendToSlack() should be called with correct parameters", func() {
+
+					m.AssertExpectations(t)
+
+					Convey("And send 500 to http.ResponseWriter", func() {
+						So(w.Code, ShouldEqual, 500)
+					})
+
+				})
+			})
+		})
+
+	})
+
+	Convey("Given a POST request with valid slack_url param and empty body", t, func() {
+
+		expectedURL := "https://example.com/AAA/BB/C"
+
+		req, _ := http.NewRequest("POST", "http://example.com?slack_url="+expectedURL, nil)
+
+		// Stubs
+		m := new(MyMockedObject)
+		w := httptest.NewRecorder()
+
+		Convey("When invoke hanlder() with them", func() {
+
+			handler(w, req, m.sendToSlack)
+
+			Convey("Then sendToSlack() should never be called", func() {
+
+				m.AssertNotCalled(t, "sendToSlack")
+
+				Convey("And send 400 to http.ResponseWriter", func() {
+					So(w.Code, ShouldEqual, 400)
+				})
+
+			})
+		})
+	})
+
+	Convey("Given a POST request without slack_url param", t, func() {
+
+		req, _ := http.NewRequest("POST", "http://example.com", nil)
+
+		// Stubs
+		m := new(MyMockedObject)
+		w := httptest.NewRecorder()
+
+		Convey("When invoke hanlder() with them", func() {
+
+			handler(w, req, m.sendToSlack)
+
+			Convey("Then sendToSlack() should never be called", func() {
+
+				m.AssertNotCalled(t, "sendToSlack")
+
+				Convey("And send 400 to http.ResponseWriter", func() {
+					So(w.Code, ShouldEqual, 400)
+
+				})
+			})
+		})
 	})
 }
