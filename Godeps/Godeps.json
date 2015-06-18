@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/cybertk/worktile-events-to-slack",
 	"GoVersion": "go1.4.2",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/jtolds/gls",
@@ -18,6 +15,20 @@
 			"ImportPath": "github.com/smartystreets/goconvey/convey",
 			"Comment": "1.5.0-390-g7a3785c",
 			"Rev": "7a3785c3002a330211525464d402c07b2afce5a7"
+		},
+		{
+			"ImportPath": "github.com/stretchr/objx",
+			"Rev": "cbeaeb16a013161a98496fad62933b1d21786672"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-15-gddcad49",
+			"Rev": "ddcad49ec6b8f31bc3daf3a1fbea7eac58d61ff0"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/mock",
+			"Comment": "v1.0-15-gddcad49",
+			"Rev": "ddcad49ec6b8f31bc3daf3a1fbea7eac58d61ff0"
 		}
 	]
 }
