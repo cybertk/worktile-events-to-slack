@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/cybertk/worktile-events-to-slack/worktile"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestFormat(t *testing.T) {
@@ -136,5 +141,79 @@ func TestFormat(t *testing.T) {
 				So(attachment.Text, ShouldContainSubstring, "Comment User")
 			})
 		})
+	})
+}
+
+type MyMockedObject struct {
+	mock.Mock
+}
+
+func (m *MyMockedObject) sendToSlack(url string, event worktile.Event) error {
+	args := m.Called(url, event)
+	return args.Error(0)
+}
+
+func TestHandler(t *testing.T) {
+
+	Convey("Given a normal http.Request", t, func() {
+
+		data := []byte(`
+{
+	"action": "create_task",
+	"data": {
+		"tid": "12caaedfe54c471abec4dc54081a135e",
+		"name": "Create Task",
+		"labels": [],
+		"assign": [],
+		"entry_id": "31d8cfe8bd6d4f11ba381be66d5fb643",
+		"entry_name": "TODO",
+		"expire_date": 0,
+		"create_by": {
+			"uid": "c61889a8603c4d26aae65aaab747d9dd",
+			"name": "quanlong",
+			"display_name": "Quanlong",
+			"email": "kyan.ql.he@gmail.com"
+		},
+		"create_date": 1431594004446,
+		"project": {
+			"pid": "f5fb3690f0e3403abf3f590a08b3df95",
+			"name": "Foo Project"
+		}
+	}
+}
+		`)
+
+		expectedURL := "https://example.com/AAA/BB/C"
+
+		// TODO: Crash when pass nil as body
+		req, _ := http.NewRequest("POST", "http://example.com?slack_url="+expectedURL, bytes.NewBuffer(data))
+
+		var notification worktile.Notification
+		json.NewDecoder(bytes.NewBuffer(data)).Decode(&notification)
+
+		Convey("And a stub func of sendToSlack", func() {
+
+			// Stubs
+			w := httptest.NewRecorder()
+			m := new(MyMockedObject)
+
+			m.On("sendToSlack", expectedURL, notification.Event()).Return(nil).Once()
+
+			Convey("When invoke with hanlder()", func() {
+
+				handler(w, req, m.sendToSlack)
+
+				Convey("Then sendToSlack() should be called properly", func() {
+
+					m.AssertExpectations(t)
+
+					Convey("And http.ResponseWriter should be writeen properly", func() {
+						So(w.Code, ShouldEqual, 200)
+					})
+
+				})
+			})
+		})
+
 	})
 }

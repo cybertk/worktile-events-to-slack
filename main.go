@@ -78,14 +78,14 @@ func format(event worktile.Event) SlackAttachment {
 	return attachment
 }
 
-func sendToSlack(webhookUrl string, event worktile.Event) (*http.Response, error) {
+func sendToSlack(webhookUrl string, event worktile.Event) error {
 	slackMessage := SlackMessage{
 		Attachments: [...]SlackAttachment{format(event)},
 	}
 
 	payload, err := json.Marshal(slackMessage)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	payloadStr := string(payload)
 
@@ -94,11 +94,19 @@ func sendToSlack(webhookUrl string, event worktile.Event) (*http.Response, error
 	}
 
 	// Slack incoming webhooks API, see https://api.slack.com/incoming-webhooks
-	return http.PostForm(webhookUrl, url.Values{"payload": {payloadStr}})
+	_, err = http.PostForm(webhookUrl, url.Values{"payload": {payloadStr}})
+	return err
 }
 
-func handler(w http.ResponseWriter, r *http.Request, slackUrl string) {
+func handler(w http.ResponseWriter, r *http.Request, send func(string, worktile.Event) error) {
 	var notification worktile.Notification
+
+	var slackUrl = r.FormValue("slack_url")
+
+	if len(slackUrl) == 0 {
+		fmt.Println("environment variables SLACK_URL is not set correctly")
+		return
+	}
 
 	if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
 		fmt.Println("Decode error")
@@ -110,32 +118,26 @@ func handler(w http.ResponseWriter, r *http.Request, slackUrl string) {
 		fmt.Println(string(notification.Data))
 	}
 
-	if _, err := sendToSlack(slackUrl, notification.Event()); err != nil {
-		w.WriteHeader(200)
-	} else {
+	if err := send(slackUrl, notification.Event()); err != nil {
 		w.WriteHeader(500)
+	} else {
+		w.WriteHeader(200)
 	}
 }
 
 func main() {
 
-	incomingWebhookUrl := os.Getenv("SLACK_URL")
 	port := os.Getenv("PORT")
 
 	if len(port) == 0 {
 		// Fallback to default port 3000
 		port = "3000"
 	}
-	if len(incomingWebhookUrl) == 0 {
-		fmt.Println("environment variables SLACK_URL is not set correctly")
-		return
-	}
 
-	fmt.Println("Slack Incoming Webhook URL: " + incomingWebhookUrl)
 	fmt.Println("Port: " + port)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r, incomingWebhookUrl)
+		handler(w, r, sendToSlack)
 	})
 	http.ListenAndServe(":"+port, nil)
 }
