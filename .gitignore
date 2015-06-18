@@ -23,6 +23,5 @@ _testmain.go
 *.test
 *.prof
 
-# vagrant
-.vagrant
-script/custom-vagrant
+# bin
+worktile-events-to-slack

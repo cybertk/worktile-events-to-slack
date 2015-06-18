@@ -1,4 +1,7 @@
-all: test
+all: test build
+
+build:
+	godep go buil
 
 clean:
 	git clean -Xdf -e '!.vagrant'
