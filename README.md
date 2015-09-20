@@ -4,6 +4,7 @@
 
 [![CI Status](http://img.shields.io/travis/cybertk/worktile-events-to-slack/master.svg?style=flat)](https://travis-ci.org/cybertk/worktile-events-to-slack)
 [![Docker Repository on Quay.io](https://quay.io/repository/quanlong/worktile-events-to-slack/status "Docker Repository on Quay.io")](https://quay.io/repository/quanlong/worktile-events-to-slack)
+[![Layers](https://badge.imagelayers.io/quanlong/worktile-events-to-slack:latest.svg)](https://imagelayers.io/?images=quanlong/worktile-events-to-slack:latest 'Get your own badge on imagelayers.io')
 
 **worktile-events-to-slack**可以将Worktile的事件通知转发到Slack, **Slack Incoming Webhook**的地址可以通过**QueryString**参数`slack_url`动态配置.
 
@@ -34,3 +35,7 @@ Development environment is backed by Docker, so enter dev env with
 Then test with
 
     make test
+
+## Contribution
+
+See [roadmap](ROADMAP.md)
